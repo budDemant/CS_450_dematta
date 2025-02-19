@@ -1,6 +1,6 @@
 # CS 450 (Computer Graphics)
 ***Spring 2025***  
-***Author: Anthony DeMatteo***  
+***Author: Anthony DeMatteo***
 ***Original Author: Dr. Michael J. Reale***  
 ***SUNY Polytechnic Institute*** 
 
