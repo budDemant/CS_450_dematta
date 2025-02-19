@@ -184,7 +184,7 @@ bool createVulkanSwapchain(VulkanInitData &vkInitData) {
 
     // Convert to our data structure so we use VulkanHpp consistently
     vkInitData.swapchain.chain = vk::SwapchainKHR { vkSwapchain.swapchain };
-    vkInitData.swapchain.format = vk::Format { vkSwapchain.image_format };
+    vkInitData.swapchain.format = vk::Format(vkSwapchain.image_format);
     vkInitData.swapchain.extent = vk::Extent2D { vkSwapchain.extent };
     
     vector<VkImageView> vkViews = vkSwapchain.get_image_views().value();
