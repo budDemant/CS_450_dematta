@@ -344,13 +344,18 @@ int main(int argc, char **argv) {
             ),
             vk::SubpassContents::eInline
         );
-        ///////////////////////////////
+      
+        commandBuffer.bindPipeline(
+            vk::PipelineBindPoint::eGraphics,
+            graphicsPipeline
+        );
+
         vk::Viewport viewports[] = 
         {
-                {0, 0,
-                (float)swapextent.width,
-                (float)swapextent.height,
-                0.0f, 1.0f}
+            {0, 0,
+            (float)swapextent.width,
+            (float)swapextent.height,
+            0.0f, 1.0f}
         };
         commandBuffer.setViewport(0, viewports);
 
@@ -361,6 +366,18 @@ int main(int argc, char **argv) {
         commandBuffer.setScissor(0, scissors);
 
         // RENDER TODO
+
+        vk::Buffer vertBuffers[] = {vkVertices.buffer};
+        vk::DeviceSize offsets[] = {0};
+        commandBuffer.bindVertexBuffers(0, vertBuffers, offsets);
+
+        commandBuffer.bindIndexBuffer(
+            vkIndices.buffer, 0,
+            vk::IndexType::eUint32
+        );
+
+        commandBuffer.drawIndexed(
+            indices.size(), 1, 0, 0, 0);
 
         commandBuffer.endRenderPass();
         commandBuffer.end();
