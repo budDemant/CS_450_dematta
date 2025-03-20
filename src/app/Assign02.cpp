@@ -2,6 +2,25 @@
 #include "VKRender.hpp"
 #include "VKImage.hpp"
 
+#include <assimp/Importer.hpp> 
+#include <assimp/scene.h> 
+#include <assimp/postprocess.h> 
+#include "MeshData.hpp"
+
+
+struct SceneData {     
+    vector<VulkanMesh> allMeshes; 
+    const aiScene *scene = nullptr; 
+    };
+
+SceneData sceneData;
+
+
+
+
+
+
+
 int main(int argc, char **argv) {
     cout << "BEGIN FORGING!!!" << endl;
 
