@@ -114,6 +114,17 @@ class Assign02RenderEngine : public VulkanRenderEngine {
             m.vertices.push_back(v);
 
         }
+
+        // Loop through all faces in the aiMesh (mesh->mNumFaces)
+        for (unsigned int i = 0; i < mesh->mNumFaces; i++){
+            aiFace face = mesh->mFaces[i];
+
+            // Loop through the number of indices for this face (face.mNumIndices)
+            for (unsigned int k = 0; k < face.mNumIndices; k++) {
+                m.indices.push_back(face.mIndices[k]); 
+            }
+        }
+            
     } 
 
 
