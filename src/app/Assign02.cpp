@@ -143,6 +143,14 @@ class Assign02RenderEngine : public VulkanRenderEngine {
 int main(int argc, char **argv) {
     cout << "BEGIN FORGING!!!" << endl;
 
+    // default model path
+    std::string modelPath = "sampleModels/sphere.obj";
+
+    // If argc >= 2, grab argv[1] as the model path to load and convert to a string.
+    if (argc >= 2) {
+        modelPath = std::string(argv[1]);
+    }
+
     // Set name
     string appName = "Assign02";
     string windowTitle = "Assign02: dematta";
