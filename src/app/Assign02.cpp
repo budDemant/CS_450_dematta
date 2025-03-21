@@ -101,6 +101,17 @@ class Assign02RenderEngine : public VulkanRenderEngine {
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i){
             Vertex v;
 
+            /* Grab the vertex position information from mesh->mVertices[i] 
+            and store it in the Vertex's position. */
+            aiVector3D aiPos = mesh->mVertices[i];
+            // somehow convert to glm::vec3 structs
+            v.pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+
+            // Set the color of the Vertex (non-black and alpha = 1.0)
+            v.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            
+            // Add the Vertex to the Mesh's vertices list
+            m.vertices.push_back(v);
 
         }
     } 
