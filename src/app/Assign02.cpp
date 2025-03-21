@@ -90,7 +90,20 @@ class Assign02RenderEngine : public VulkanRenderEngine {
                                 
 
                         
-                    };
+};
+
+    void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
+        // Clear out the Mesh's vertices and indices.
+        m.vertices.clear();
+        m.indices.clear();
+
+        // Loop through all vertices in the aiMesh (mesh->mNumVertices)
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i){
+            Vertex v;
+
+
+        }
+    } 
 
 
 
