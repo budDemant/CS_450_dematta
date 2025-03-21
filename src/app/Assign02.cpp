@@ -144,12 +144,31 @@ int main(int argc, char **argv) {
     cout << "BEGIN FORGING!!!" << endl;
 
     // default model path
-    std::string modelPath = "sampleModels/sphere.obj";
+    string modelPath = "sampleModels/sphere.obj";
 
     // If argc >= 2, grab argv[1] as the model path to load and convert to a string.
     if (argc >= 2) {
-        modelPath = std::string(argv[1]);
+        modelPath = string(argv[1]);
     }
+
+    // needed to load models, works with ReadFile
+    Assimp::Importer importer;
+
+    // load options
+    sceneData.scene = importer.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_FlipUVs | 
+        aiProcess_GenNormals |          
+        aiProcess_JoinIdenticalVertices 
+    );
+
+    // Check to make sure the model loaded correctly
+    if (!sceneData.scene || 
+        (sceneData.scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || 
+        !sceneData.scene->mRootNode) 
+    {
+        return -1;  // Exit with error
+    }
+    // maybe cerr here if things go wrong?
+
 
     // Set name
     string appName = "Assign02";
@@ -176,21 +195,21 @@ int main(int argc, char **argv) {
     renderEngine->initialize(&params);
     
     // Create very simple quad on host
-    Mesh<SimpleVertex> hostMesh = {
-        {
-            {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-            {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-            {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f, 1.0f}}
-        },
-        { 0, 2, 1, 2, 0, 3 }
-    };
+    // Mesh<SimpleVertex> hostMesh = {
+    //     {
+    //         {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+    //         {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+    //         {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+    //         {{-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f, 1.0f}}
+    //     },
+    //     { 0, 2, 1, 2, 0, 3 }
+    // };
     
     // Create Vulkan mesh
-    VulkanMesh mesh = createVulkanMesh(vkInitData, renderEngine->getCommandPool(), hostMesh); 
-    vector<VulkanMesh> allMeshes {
-        { mesh }
-    };
+    // VulkanMesh mesh = createVulkanMesh(vkInitData, renderEngine->getCommandPool(), hostMesh); 
+    // vector<VulkanMesh> allMeshes {
+    //     { mesh }
+    // };
 
     float timeElapsed = 1.0f;
     int framesRendered = 0;
@@ -206,7 +225,7 @@ int main(int argc, char **argv) {
         glfwPollEvents();  
 
         // Draw frame
-        renderEngine->drawFrame(&allMeshes);  
+        // renderEngine->drawFrame(&allMeshes);  
 
         // Increment frame count
         framesRendered++;
@@ -230,7 +249,7 @@ int main(int argc, char **argv) {
     vkInitData.device.waitIdle();
     
     // Cleanup  
-    cleanupVulkanMesh(vkInitData, mesh);
+    // cleanupVulkanMesh(vkInitData, mesh);
     delete renderEngine;
     cleanupVulkanBootstrap(vkInitData);
     cleanupGLFWWindow(window);
