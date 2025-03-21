@@ -8,12 +8,96 @@
 #include "MeshData.hpp"
 
 
+struct Vertex { 
+    glm::vec3 pos; 
+    glm::vec4 color; 
+    };
+
 struct SceneData {     
     vector<VulkanMesh> allMeshes; 
     const aiScene *scene = nullptr; 
     };
 
 SceneData sceneData;
+
+
+class Assign02RenderEngine : public VulkanRenderEngine {
+    public:
+        // constructor
+        Assign02RenderEngine(VulkanInitData &vkInitData) : VulkanRenderEngine(vkInitData) {}
+
+        // destructor
+        virtual ~Assign02RenderEngine() {}; 
+    
+        virtual bool initialize(VulkanInitRenderParams *params) override {
+            if (!VulkanRenderEngine::initialize(params)) {
+                return false;
+            }
+            return true;
+        }
+
+        // pulled from VKRender.cpp (line 415 except for cast and mesh loop)
+        virtual void recordCommandBuffer(void *userData,
+            vk::CommandBuffer &commandBuffer,
+            unsigned int frameIndex) override {
+
+                // cast userData as a SceneData pointer
+                SceneData *sceneData = static_cast<SceneData*>(userData);
+                 
+                // Begin commands
+                commandBuffer.begin(vk::CommandBufferBeginInfo());
+
+                // Get the extents of the buffers (since we'll use it a few times)
+                vk::Extent2D extent = vkInitData.swapchain.extent;
+
+                // Begin render pass
+                array<vk::ClearValue, 2> clearValues {};
+                clearValues[0].color = vk::ClearColorValue(0.0f, 2.2f, 0.8f, 1.0f);
+                clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0.0f);
+
+                commandBuffer.beginRenderPass(vk::RenderPassBeginInfo(
+                this->renderPass, 
+                this->framebuffers[frameIndex], 
+                { {0,0}, extent },
+                clearValues),
+                vk::SubpassContents::eInline);
+
+                // Bind pipeline
+                commandBuffer.bindPipeline(
+                vk::PipelineBindPoint::eGraphics, 
+                this->pipelineData.graphicsPipeline);
+
+                // Set up viewport and scissors
+                vk::Viewport viewports[] = {{0, 0, (float)extent.width, (float)extent.height, 0.0f, 1.0f}};
+                commandBuffer.setViewport(0, viewports);
+
+                vk::Rect2D scissors[] = {{{0,0}, extent}};
+                commandBuffer.setScissor(0, scissors);
+
+                // Record our buffer (ONLY drawing first mesh)
+                // recordDrawVulkanMesh(commandBuffer, allMeshes->at(0));
+                // Loop through and recordDrawVulkanMesh() on each VulkanMesh in sceneData->allMeshes.
+                for (VulkanMesh &mesh : sceneData->allMeshes) {
+                    recordDrawVulkanMesh(commandBuffer, mesh);
+                }
+
+                // Stop render pass
+                commandBuffer.endRenderPass();
+
+                // End command buffer
+                commandBuffer.end();
+                }
+                                
+
+                        
+                    };
+
+
+
+
+
+
+    
 
 
 
