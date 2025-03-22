@@ -269,6 +269,11 @@ int main(int argc, char **argv) {
     
     // Cleanup  
     // cleanupVulkanMesh(vkInitData, mesh);
+    for (VulkanMesh &mesh : sceneData.allMeshes) {
+        cleanupVulkanMesh(vkInitData, mesh);
+    }
+    // Clear out your list of VulkanMesh objects in your sceneData
+    sceneData.allMeshes.clear();
     delete renderEngine;
     cleanupVulkanBootstrap(vkInitData);
     cleanupGLFWWindow(window);
