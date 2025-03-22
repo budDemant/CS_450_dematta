@@ -107,7 +107,6 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
         aiVector3D aiPos = mesh->mVertices[i];
         // somehow convert to glm::vec3 structs
         v.pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
-
         // Set the color of the Vertex (non-black and alpha = 1.0)
         v.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
         
@@ -115,6 +114,7 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
         m.vertices.push_back(v);
 
     }
+    
 
     // debug
     cout << "vertices: " << m.vertices.size() << endl;
