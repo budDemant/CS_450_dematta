@@ -116,15 +116,11 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
     }
     
 
-    // debug
-    cout << "vertices: " << m.vertices.size() << endl;
 
     // Loop through all faces in the aiMesh (mesh->mNumFaces)
     for (unsigned int i = 0; i < mesh->mNumFaces; i++){
         aiFace face = mesh->mFaces[i];
 
-        // debug
-        // cout << "Face indices: " << face.mNumIndices << endl;
 
         // Loop through the number of indices for this face (face.mNumIndices)
         for (unsigned int k = 0; k < face.mNumIndices; k++) {
@@ -220,8 +216,6 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
         // Add the VulkanMesh to your vector of VulkanMesh's in your sceneData
         sceneData.allMeshes.push_back(vulkanMesh);
 
-        //debug
-        cout << "num meshes: " << sceneData.scene->mNumMeshes << endl;
     }
 
     // Create Vulkan mesh
