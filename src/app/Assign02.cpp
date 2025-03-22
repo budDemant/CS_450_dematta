@@ -92,55 +92,52 @@ class Assign02RenderEngine : public VulkanRenderEngine {
                         
 };
 
-    void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
-        // Clear out the Mesh's vertices and indices.
-        m.vertices.clear();
-        m.indices.clear();
 
-        // Loop through all vertices in the aiMesh (mesh->mNumVertices)
-        for (unsigned int i = 0; i < mesh->mNumVertices; ++i){
-            Vertex v;
+void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
+    // Clear out the Mesh's vertices and indices.
+    m.vertices.clear();
+    m.indices.clear();
 
-            /* Grab the vertex position information from mesh->mVertices[i] 
-            and store it in the Vertex's position. */
-            aiVector3D aiPos = mesh->mVertices[i];
-            // somehow convert to glm::vec3 structs
-            v.pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
+    // Loop through all vertices in the aiMesh (mesh->mNumVertices)
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i){
+        Vertex v;
 
-            // Set the color of the Vertex (non-black and alpha = 1.0)
-            v.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            
-            // Add the Vertex to the Mesh's vertices list
-            m.vertices.push_back(v);
+        /* Grab the vertex position information from mesh->mVertices[i] 
+        and store it in the Vertex's position. */
+        aiVector3D aiPos = mesh->mVertices[i];
+        // somehow convert to glm::vec3 structs
+        v.pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
 
+        // Set the color of the Vertex (non-black and alpha = 1.0)
+        v.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        
+        // Add the Vertex to the Mesh's vertices list
+        m.vertices.push_back(v);
+
+    }
+
+    // debug
+    cout << "vertices: " << m.vertices.size() << endl;
+
+    // Loop through all faces in the aiMesh (mesh->mNumFaces)
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++){
+        aiFace face = mesh->mFaces[i];
+
+        // debug
+        // cout << "Face indices: " << face.mNumIndices << endl;
+
+        // Loop through the number of indices for this face (face.mNumIndices)
+        for (unsigned int k = 0; k < face.mNumIndices; k++) {
+            m.indices.push_back(face.mIndices[k]); 
         }
-
-        // Loop through all faces in the aiMesh (mesh->mNumFaces)
-        for (unsigned int i = 0; i < mesh->mNumFaces; i++){
-            aiFace face = mesh->mFaces[i];
-
-            // Loop through the number of indices for this face (face.mNumIndices)
-            for (unsigned int k = 0; k < face.mNumIndices; k++) {
-                m.indices.push_back(face.mIndices[k]); 
-            }
-        }
-            
-    } 
+    }
+        
+} 
 
 
 
 
-
-
-    
-
-
-
-
-
-
-
-int main(int argc, char **argv) {
+    int main(int argc, char **argv) {
     cout << "BEGIN FORGING!!!" << endl;
 
     // default model path
@@ -222,6 +219,9 @@ int main(int argc, char **argv) {
 
         // Add the VulkanMesh to your vector of VulkanMesh's in your sceneData
         sceneData.allMeshes.push_back(vulkanMesh);
+
+        //debug
+        cout << "num meshes: " << sceneData.scene->mNumMeshes << endl;
     }
 
     // Create Vulkan mesh
