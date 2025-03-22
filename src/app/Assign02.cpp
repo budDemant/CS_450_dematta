@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
         glfwPollEvents();  
 
         // Draw frame
-        // renderEngine->drawFrame(&allMeshes);  
+        renderEngine->drawFrame(&sceneData);   
 
         // Increment frame count
         framesRendered++;
