@@ -169,6 +169,8 @@ int main(int argc, char **argv) {
     }
     // maybe cerr here if things go wrong?
 
+    
+
 
     // Set name
     string appName = "Assign02";
@@ -183,6 +185,8 @@ int main(int argc, char **argv) {
     VulkanInitData vkInitData;
     initVulkanBootstrap(appName, window, vkInitData);
 
+    
+
     // Setup basic forward rendering process
     string vertSPVFilename = "build/compiledshaders/" + appName + "/shader.vert.spv";                                                    
     string fragSPVFilename = "build/compiledshaders/" + appName + "/shader.frag.spv";
@@ -190,8 +194,10 @@ int main(int argc, char **argv) {
     // Create render engine
     VulkanInitRenderParams params = {
         vertSPVFilename, fragSPVFilename
-    };    
-    VulkanRenderEngine *renderEngine = new VulkanRenderEngine(  vkInitData);
+    };
+    // Make sure your VulkanRenderEngine is an instance of Assign02RenderEngine
+    VulkanRenderEngine *renderEngine = new Assign02RenderEngine(vkInitData);
+    // VulkanRenderEngine *renderEngine = new VulkanRenderEngine(  vkInitData);
     renderEngine->initialize(&params);
     
     // Create very simple quad on host
@@ -205,6 +211,19 @@ int main(int argc, char **argv) {
     //     { 0, 2, 1, 2, 0, 3 }
     // };
     
+    for (unsigned int i = 0; i < sceneData.scene->mNumMeshes; ++i) {
+        Mesh<Vertex> meshData; // Create a Mesh<Vertex> object inside the loop 
+        
+        // Call extractMeshData to get a Mesh from each sceneData.scene->mMeshes[i]
+        extractMeshData(sceneData.scene->mMeshes[i], meshData);
+
+        // convert to VulkanMesh
+        VulkanMesh vulkanMesh = createVulkanMesh(vkInitData, renderEngine->getCommandPool(), meshData);
+
+        // Add the VulkanMesh to your vector of VulkanMesh's in your sceneData
+        sceneData.allMeshes.push_back(vulkanMesh);
+    }
+
     // Create Vulkan mesh
     // VulkanMesh mesh = createVulkanMesh(vkInitData, renderEngine->getCommandPool(), hostMesh); 
     // vector<VulkanMesh> allMeshes {
