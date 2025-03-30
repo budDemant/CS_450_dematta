@@ -24,8 +24,6 @@ include(FetchContent)
 
 find_package(Vulkan REQUIRED)
 
-find_package(Threads REQUIRED)
-
 #####################################
 # GLFW
 #####################################
@@ -58,19 +56,14 @@ find_package(glm 1.0.1 QUIET)
 if(NOT glm_FOUND)
     message("GLM not installed...downloading from source...")
 
-    FetchContent_Declare(
-        glm
-        GIT_REPOSITORY https://github.com/g-truc/glm
-        GIT_TAG 1.0.1  
-        GIT_SHALLOW 1
-    )    
-    FetchContent_MakeAvailable(glm)
-    set(glfw3_VERSION "1.0.1")
-else()
-    message("GLM already installed on system...")
-endif()
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm
+    GIT_TAG 1.0.1  
+    GIT_SHALLOW 1
+)
 
-message("GLM version: ${glm_VERSION}")
+FetchContent_MakeAvailable(glm)
 
 #####################################
 # Assimp
@@ -131,8 +124,6 @@ endif()
 
 include_directories("src/include" Vulkan::Headers)
 
-message(${Vulkan_INCLUDE_DIRS})
-
 file(GLOB GENERAL_SOURCES    
     "src/lib/*.cpp"  
     "src/lib/*.hpp"  
@@ -183,7 +174,7 @@ endmacro()
 
 set(ALL_LIBRARIES 
     Vulkan::Vulkan    
-    glfw
+    glfw   
     glm::glm  
     assimp::assimp
     vk-bootstrap::vk-bootstrap
