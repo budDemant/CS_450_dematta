@@ -131,6 +131,21 @@ class Assign03RenderEngine : public VulkanRenderEngine {
 };
 
 
+void renderScene(vk::CommandBuffer &commandBuffer,
+    SceneData *sceneData,
+    aiNode *node,
+    glm::mat4 parentMat,
+    int level) {
+        // get the transformation for the current node
+        aiMatrix4x4 aiT = node->mTransformation;
+
+        // convert the transformation to a glm::mat4 nodeT
+        glm::mat4 nodeT = aiMatToGLM4(aiT);
+        
+        
+    }
+
+
 void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
     // Clear out the Mesh's vertices and indices.
     m.vertices.clear();
