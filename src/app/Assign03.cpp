@@ -34,6 +34,24 @@ struct SceneData {
 SceneData sceneData;
 
 
+glm::mat4 makeRotateZ(float rotAngle, glm::vec3 offset) {
+    // convert rotAngle to radians
+    float radians = glm::radians(rotAngle);
+
+    // translate by negative offset
+    glm::mat4 translateNegOffset = glm::translate(glm::mat4(1.0f), -offset);
+
+    // rotate rotAngle around the Z axis 
+    glm::mat4 rotateZ = glm::rotate(glm::mat4(1.0f), radians, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    // translate by offset
+    glm::mat4 translateOffset = glm::translate(glm::mat4(1.0f), offset);
+
+    // return the composite transformation
+    return translateOffset * rotateZ * translateNegOffset;
+}
+
+
 class Assign03RenderEngine : public VulkanRenderEngine {
     public:
         // constructor
