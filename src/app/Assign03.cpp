@@ -140,8 +140,15 @@ void renderScene(vk::CommandBuffer &commandBuffer,
         aiMatrix4x4 aiT = node->mTransformation;
 
         // convert the transformation to a glm::mat4 nodeT
-        glm::mat4 nodeT = aiMatToGLM4(aiT);
-        
+        glm::mat4 nodeT;
+        aiMatToGLM4(aiT, nodeT);
+
+        // compute current model matrix
+        glm::mat4 modelMat = parentMat * nodeT;
+
+        // get location of current node
+        glm::vec4 pos4 = modelMat[3]; // last column of modelMat
+        glm::vec3 pos = glm::vec3(pos4); // convert vec4 to a vec3 pos
         
     }
 
