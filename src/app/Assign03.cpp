@@ -119,7 +119,14 @@ class Assign03RenderEngine : public VulkanRenderEngine {
                 commandBuffer.end();
                 }
                                 
-
+        virtual vector <vk::PushConstantRange> getPushConstantRanges() override {
+            // from ProfExercises07 line 314
+            return {
+                vk::PushConstantRange {
+                    vk::ShaderStageFlagBits::eVertex, 0, sizeof(UPushVertex) 
+                }
+            };
+        }
                         
 };
 
