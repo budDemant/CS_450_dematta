@@ -7,6 +7,18 @@
 #include <assimp/postprocess.h> 
 #include "MeshData.hpp"
 
+#include "glm/gtc/matrix_transform.hpp" 
+#define GLM_ENABLE_EXPERIMENTAL 
+#include "glm/gtx/transform.hpp" 
+#include "glm/gtx/string_cast.hpp" 
+#include "glm/gtc/type_ptr.hpp" 
+#include "VKUtility.hpp" 
+
+
+struct UPushVertex {
+    alignas(16) glm::mat4 modelMat;
+};
+
 
 struct Vertex { 
     glm::vec3 pos; 
@@ -15,7 +27,8 @@ struct Vertex {
 
 struct SceneData {     
     vector<VulkanMesh> allMeshes; 
-    const aiScene *scene = nullptr; 
+    const aiScene *scene = nullptr;
+    float rotAngle = 0.0f; // hold current local rotation angle in degrees
     };
 
 SceneData sceneData;
