@@ -166,6 +166,25 @@ void renderScene(vk::CommandBuffer &commandBuffer,
             vk::ShaderStageFlagBits::eVertex,
             0, sizeof(UPushVertex), &pushData
         );
+
+        // draw each mesh in the current node
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
+            int index = node->mMeshes[i];
+            VulkanMesh &mesh = sceneData->allMeshes.at(index);
+            recordDrawVulkanMesh(commandBuffer, mesh);
+        }
+
+        // call renderScene() on each child of the NODE
+        for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+            renderScene(
+                commandBuffer,
+                sceneData,
+                node->mChildren[i],
+                modelMat, // parent matrix
+                level + 1,
+                pipelineLayout
+            );
+        }
     }
 
 
