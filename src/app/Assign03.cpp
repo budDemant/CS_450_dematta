@@ -33,6 +33,13 @@ struct SceneData {
 
 SceneData sceneData;
 
+void renderScene(vk::CommandBuffer &commandBuffer,
+    SceneData *sceneData,
+    aiNode *node,
+    glm::mat4 parentMat,
+    int level,
+    vk::PipelineLayout pipelineLayout);
+
 
 glm::mat4 makeRotateZ(float rotAngle, glm::vec3 offset) {
     // convert rotAngle to radians
