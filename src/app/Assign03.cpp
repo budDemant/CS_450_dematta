@@ -135,7 +135,8 @@ void renderScene(vk::CommandBuffer &commandBuffer,
     SceneData *sceneData,
     aiNode *node,
     glm::mat4 parentMat,
-    int level) {
+    int level,
+    vk::PipelineLayout pipelineLayout) {
         // get the transformation for the current node
         aiMatrix4x4 aiT = node->mTransformation;
 
@@ -149,7 +150,22 @@ void renderScene(vk::CommandBuffer &commandBuffer,
         // get location of current node
         glm::vec4 pos4 = modelMat[3]; // last column of modelMat
         glm::vec3 pos = glm::vec3(pos4); // convert vec4 to a vec3 pos
+
+        // get a proper local Z rotation: R
+        glm::mat4 R = makeRotateZ(sceneData-> rotAngle, pos);
+        glm::mat4 tmpModel = R * modelMat;
         
+        // create an instance of UPushVertex and store tmpModel as the model matrix
+        UPushVertex pushData;
+        pushData.modelMat = tmpModel;
+
+        // use commandBuffer.pushConstants() to push up the UPushVertex data
+        commandBuffer.pushConstants(
+            // this->pipelineData... doesn't work for me, used similar structure to ProfExercises07 line 459
+            pipelineLayout,
+            vk::ShaderStageFlagBits::eVertex,
+            0, sizeof(UPushVertex), &pushData
+        );
     }
 
 
