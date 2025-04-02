@@ -108,9 +108,17 @@ class Assign03RenderEngine : public VulkanRenderEngine {
                 // Record our buffer (ONLY drawing first mesh)
                 // recordDrawVulkanMesh(commandBuffer, allMeshes->at(0));
                 // Loop through and recordDrawVulkanMesh() on each VulkanMesh in sceneData->allMeshes.
-                for (VulkanMesh &mesh : sceneData->allMeshes) {
-                    recordDrawVulkanMesh(commandBuffer, mesh);
-                }
+                // for (VulkanMesh &mesh : sceneData->allMeshes) {
+                //     recordDrawVulkanMesh(commandBuffer, mesh);
+                // }
+                renderScene(
+                    commandBuffer,
+                    sceneData,
+                    sceneData->scene->mRootNode,
+                    glm::mat4(1.0f), // identity matrix
+                    0, // level
+                    this->pipelineData.pipelineLayout
+                );
 
                 // Stop render pass
                 commandBuffer.endRenderPass();
@@ -225,7 +233,19 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
         
 } 
 
-
+static void key_callback (GLFWwindow *window,
+                            int key, int scancode,
+                            int action, int mods) {
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        if (key == GLFW_KEY_ESCAPE) {
+            glfwSetWindowShouldClose(window,true);
+        } else if (key == GLFW_KEY_J) {
+            sceneData.rotAngle += 1.0f;
+        } else if (key == GLFW_KEY_K) {
+            sceneData.rotAngle -= 1.0f;
+        }
+    }
+}
 
 
     int main(int argc, char **argv) {
@@ -268,6 +288,7 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
 
     // Create GLFW window
     GLFWwindow* window = createGLFWWindow(windowTitle, windowWidth, windowHeight);
+    glfwSetKeyCallback(window, key_callback);
 
     // Setup up Vulkan via vk-bootstrap
     VulkanInitData vkInitData;
