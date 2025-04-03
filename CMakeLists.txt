@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.24) 
 project(CS_450_Assignments)
-set(CMAKE_INSTALL_PREFIX .)
 
-# Comment out this line if it creates problems
-set(CMAKE_PREFIX_PATH "D:/Software/Windows/VulkanSDK/1.4.304.0")
+set(CMAKE_INSTALL_PREFIX .)
 
 #####################################
 # Require C++17
@@ -130,8 +128,6 @@ endif()
 #####################################
 
 include_directories("src/include" Vulkan::Headers)
-
-message(${Vulkan_INCLUDE_DIRS})
 
 file(GLOB GENERAL_SOURCES    
     "src/lib/*.cpp"  
