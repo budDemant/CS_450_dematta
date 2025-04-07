@@ -8,6 +8,7 @@
 #include "VKUtility.hpp"
 #include "VKBuffer.hpp"
 #include "VKUniform.hpp"
+#include "VKImage.hpp"
 #include "glm/glm.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
@@ -17,9 +18,19 @@
 using namespace std;
 
 struct PointVertex {
-    glm::vec3 pos;
+    glm::vec3 pos = glm::vec3(0,0,0);
+    glm::vec4 color = glm::vec4(1,1,1,1);
+    glm::vec3 normal = glm::vec3(0,0,0);
+
+    PointVertex() {};
+    PointVertex(glm::vec3 p) { pos = p; };
+    PointVertex(glm::vec3 p, glm::vec4 c) {
+        pos = p;
+        color = c;
+    };
 };
 
+/*
 vector<PointVertex> vertices = {
     {{-0.5f, -0.5f, 0.5f}},
     {{ 0.5f, -0.5f, 0.5f}},
@@ -28,6 +39,7 @@ vector<PointVertex> vertices = {
 };
 
 vector<unsigned int> indices = { 0, 2, 1, 2, 0, 3};
+*/
 
 struct UniformPush {
     alignas(16) glm::mat4 modelMat;
@@ -163,6 +175,95 @@ static void key_callback(GLFWwindow *window,
     }
 }
 
+void calculateTriangleNormal(
+    vector<PointVertex> &vertices,
+    int i0, int i1, int i2
+) {
+    glm::vec3 A = vertices.at(i0).pos;
+    glm::vec3 B = vertices.at(i1).pos;
+    glm::vec3 C = vertices.at(i2).pos;
+
+    glm::vec3 v1 = B - A;
+    glm::vec3 v2 = C - A;
+
+    glm::vec3 N = glm::cross(v1, v2);
+    N = glm::normalize(N);
+
+    vertices.at(i0).normal += N;
+    vertices.at(i1).normal += N;
+    vertices.at(i2).normal += N;
+}
+
+void calculateAllNormals(
+    vector<PointVertex> &vertices,
+    vector<unsigned int> &indices
+) {
+    for(int i = 0; i < vertices.size(); i++) {
+        vertices.at(i).normal = glm::vec3(0,0,0);
+    }
+
+    for(int i = 0; i < indices.size(); i+=3) {
+        calculateTriangleNormal(vertices,
+            indices.at(i),
+            indices.at(i+1),
+            indices.at(i+2));
+    }
+
+    for(int i = 0; i < vertices.size(); i++) {
+        vertices.at(i).normal
+        = glm::normalize(vertices.at(i).normal);
+    }
+}
+
+void makeCylinder(
+    vector<PointVertex> &vertices,
+    vector<unsigned int> &indices,
+    float length, float radius,
+    int faceCnt) {
+
+    vertices.clear();
+    indices.clear();
+
+    float angleInc
+     = (2.0f*glm::pi<float>())/((float)faceCnt);
+
+    for(int i = 0; i < faceCnt; i++) {
+        PointVertex left, right;
+        float x = length/2.0f;
+        float angle = angleInc*i;
+        float y = radius*glm::sin(angle);
+        float z = radius*glm::cos(angle);
+
+        left.pos = glm::vec3(-x, y, z);
+        right.pos = glm::vec3(x, y, z);
+
+        left.color = glm::vec4(1,0,0,1);
+        right.color = glm::vec4(0,1,0,1);
+
+        vertices.push_back(left);
+        vertices.push_back(right);
+    }
+
+    int max_vert_cnt = faceCnt*2;
+
+    for(int i = 0; i < faceCnt; i++) {
+        int low_left = 2*i;
+        int up_left = (2*(i+1))%max_vert_cnt;
+        int low_right = low_left + 1;
+        int up_right = up_left + 1;
+
+        indices.push_back(low_left);
+        indices.push_back(low_right);
+        indices.push_back(up_left);
+
+        indices.push_back(low_right);
+        indices.push_back(up_right);
+        indices.push_back(up_left);
+    }
+
+    calculateAllNormals(vertices, indices);
+}
+
 int main(int argc, char **argv) {
 
     if(argc >= 2) {
@@ -248,6 +349,11 @@ int main(int argc, char **argv) {
             vk::ImageView { oldViews.at(i)});
     }
 
+    VulkanImage depthImage
+     = createVulkanDepthImage(
+        device, phyDevice,
+        swapextent.width, swapextent.height);
+
     vector<vk::AttachmentDescription> attachDesc;
     attachDesc.push_back(vk::AttachmentDescription(
         {},
@@ -261,14 +367,32 @@ int main(int argc, char **argv) {
         vk::ImageLayout::ePresentSrcKHR
     ));
 
+    attachDesc.push_back(vk::AttachmentDescription(
+        {},
+        depthImage.format,
+        vk::SampleCountFlagBits::e1,
+        vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::AttachmentLoadOp::eDontCare,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
+    ));
+
     vk::AttachmentReference colorAttachRef(
-        0, vk::ImageLayout::eColorAttachmentOptimal
+        0, 
+        vk::ImageLayout::eColorAttachmentOptimal
+    );
+
+    vk::AttachmentReference depthAttachRef(
+        1, 
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
     );
 
     vk::SubpassDescription subpassDesc(
         vk::SubpassDescriptionFlags(),
         vk::PipelineBindPoint::eGraphics,
-        {}, colorAttachRef, {}, {}
+        {}, colorAttachRef, {}, &depthAttachRef
     );
 
     vk::RenderPass pass
@@ -279,9 +403,9 @@ int main(int argc, char **argv) {
         );
 
     auto vertSrc = readBinaryFile(
-        "build/compiledshaders/ProfExercises08/shader.vert.spv");
+        "build/compiledshaders/ProfExercises09/shader.vert.spv");
     auto fragSrc = readBinaryFile(
-        "build/compiledshaders/ProfExercises08/shader.frag.spv");
+        "build/compiledshaders/ProfExercises09/shader.frag.spv");
 
     vk::ShaderModule vertShader = createVulkanShaderModule(device, vertSrc);
     vk::ShaderModule fragShader = createVulkanShaderModule(device, fragSrc);
@@ -294,6 +418,10 @@ int main(int argc, char **argv) {
             {}, vk::ShaderStageFlagBits::eFragment, fragShader, "main"
         )
     };
+
+    vector<PointVertex> vertices;
+    vector<unsigned int> indices;
+    makeCylinder(vertices, indices, 1.0, 0.5, 10.0);
 
     vk::DeviceSize vertBufferSize = sizeof(vertices[0])*vertices.size();
     vk::DeviceSize indBufferSize = sizeof(indices[0])*indices.size();
@@ -331,7 +459,17 @@ int main(int argc, char **argv) {
             vk::VertexInputAttributeDescription(
                 0, 0, 
                 vk::Format::eR32G32B32Sfloat,
-                offsetof(PointVertex, pos))
+                offsetof(PointVertex, pos)),
+
+            vk::VertexInputAttributeDescription(
+                1, 0, 
+                vk::Format::eR32G32B32A32Sfloat,
+                offsetof(PointVertex, color)),
+
+            vk::VertexInputAttributeDescription(
+                2, 0, 
+                vk::Format::eR32G32B32Sfloat,
+                offsetof(PointVertex, normal))
         };
     
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
@@ -486,7 +624,8 @@ int main(int argc, char **argv) {
     framebuffers.resize(swapviews.size());
     for(int i = 0; i < framebuffers.size(); i++) {
         vector<vk::ImageView> attach = {
-            swapviews.at(i)
+            swapviews.at(i),
+            depthImage.view
         };
         framebuffers[i] = device.createFramebuffer(
             vk::FramebufferCreateInfo(
@@ -550,9 +689,11 @@ int main(int argc, char **argv) {
 
         commandBuffer.reset();
         commandBuffer.begin(vk::CommandBufferBeginInfo());
-        array<vk::ClearValue, 1> clearValues {};
+        array<vk::ClearValue, 2> clearValues {};
         clearValues[0].color
          = vk::ClearColorValue(0.9f, 0.9f, 0.0f, 1.0f);
+        clearValues[1].depthStencil
+        = vk::ClearDepthStencilValue(1.0f, 0.0f);
 
         commandBuffer.beginRenderPass(
             vk::RenderPassBeginInfo(
@@ -660,6 +801,8 @@ int main(int argc, char **argv) {
     }
 
     // CLEANUP TODO
+    cleanupVulkanImage(device, depthImage);
+
     for(int i = 0; i < allDescSetLayouts.size(); i++) {
         device.destroyDescriptorSetLayout(
             allDescSetLayouts.at(i));
