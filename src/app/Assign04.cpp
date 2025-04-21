@@ -280,6 +280,24 @@ static void key_callback (GLFWwindow *window,
     }
 }
 
+static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    glm::vec2 newMousePos = glm::vec2 (xpos, ypos);
+    glm::vec2 relMouse = newMousePos - sceneData.mousePos;
+
+    // Use glfwGetFramebufferSize() to acquire the current framebuffer size
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+
+    // Divide relMouse.x by current framebuffer width and relMouse.y by current framebuffer...
+    if (fbWidth > 0 && fbHeight > 0) {
+        relMouse.x /= static_cast<float>(fbWidth);
+        relMouse.y /= static_cast<float>(fbHeight);
+    }
+
+    // stored mouse position
+    sceneData.mousePos = newMousePos;
+}
+
 
     int main(int argc, char **argv) {
     cout << "BEGIN FORGING!!!" << endl;
@@ -322,6 +340,10 @@ static void key_callback (GLFWwindow *window,
     // Create GLFW window
     GLFWwindow* window = createGLFWWindow(windowTitle, windowWidth, windowHeight);
     glfwSetKeyCallback(window, key_callback);
+
+    // mouse
+    glfwSetCursorPosCallback(window, mouse_position_callback);
+
 
     // Setup up Vulkan via vk-bootstrap
     VulkanInitData vkInitData;
