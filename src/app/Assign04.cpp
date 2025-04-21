@@ -73,6 +73,17 @@ glm::mat4 makeRotateZ(float rotAngle, glm::vec3 offset) {
     return translateOffset * rotateZ * translateNegOffset;
 }
 
+glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle) {
+    float radians = glm::radians(angle); // convert angle to radians
+
+    glm::mat4 translateNegOffset = glm::translate(glm::mat4(1.0f), -offset);
+    glm::mat4 rotateAroundAxis = glm::rotate(glm::mat4(1.0f), radians, axis);
+    glm::mat4 translateOffset = glm::translate(glm::mat4(1.0f), offset);
+
+    return translateOffset * rotateAroundAxis * translateNegOffset; // return composite transformation
+
+}
+
 
 class Assign04RenderEngine : public VulkanRenderEngine {
     public:
