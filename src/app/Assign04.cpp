@@ -285,6 +285,7 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
     glm::vec2 relMouse = newMousePos - sceneData.mousePos;
 
     // Use glfwGetFramebufferSize() to acquire the current framebuffer size
+    // (similar to ProfExercises08 mouse_motion_callback)
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
 
@@ -293,6 +294,34 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
         relMouse.x /= static_cast<float>(fbWidth);
         relMouse.y /= static_cast<float>(fbHeight);
     }
+
+    // relative x motion
+    float angleX = 30.0f * relMouse.x;
+    glm::mat4 rotateYMat = makeLocalRotate(
+        sceneData.eye,
+        glm::vec3(0, 1, 0),
+        angleX
+    );
+
+    glm::vec4 lookAtV = glm::vec4(sceneData.lookAt, 1.0f);
+    lookAtV = rotateYMat * lookAtV;
+    sceneData.lookAt = glm::vec3(lookAtV);
+
+    // relative y
+    glm::vec3 camDir = sceneData.lookAt - sceneData.eye;
+    glm::vec3 localX = glm::normalize(glm::cross(camDir, glm::vec3(0, 1, 0)));
+
+    float angleY = 30.0f * relMouse.y;
+    glm::mat4 rotateXMat = makeLocalRotate(
+        sceneData.eye,
+        localX,
+        angleY
+    );
+
+    lookAtV = glm::vec4(sceneData.lookAt, 1.0f);
+    lookAtV = rotateXMat * lookAtV;
+    sceneData.lookAt = glm::vec3 (lookAtV);
+
 
     // stored mouse position
     sceneData.mousePos = newMousePos;
