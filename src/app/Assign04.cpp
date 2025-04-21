@@ -1,6 +1,7 @@
 #include "VKSetup.hpp"
 #include "VKRender.hpp"
 #include "VKImage.hpp"
+#include "VKUniform.hpp"
 
 #include <assimp/Importer.hpp> 
 #include <assimp/scene.h> 
@@ -29,9 +30,23 @@ struct SceneData {
     vector<VulkanMesh> allMeshes; 
     const aiScene *scene = nullptr;
     float rotAngle = 0.0f; // hold current local rotation angle in degrees
+
+    // camera
+    glm::vec3 eye = glm:: vec3(0.0f, 0.0f, 1.0f); // cam pos
+    glm::vec3 lookAt = glm::vec3 (0.0f, 0.0f, 0.0f); // look-at point
+
+    glm::vec2 mousePos; // to hold the last mouse position 
+
+    glm::mat4 viewMat = glm::mat4(1.0f); 
+    glm::mat4 projMat = glm::mat4(1.0f); 
     };
 
 SceneData sceneData;
+
+struct UBOVertex {
+    alignas(16) glm::mat4 viewMat;
+    alignas(16) glm::mat4 projMat;
+};
 
 void renderScene(vk::CommandBuffer &commandBuffer,
     SceneData *sceneData,
