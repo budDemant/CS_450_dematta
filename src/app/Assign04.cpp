@@ -121,6 +121,41 @@ class Assign04RenderEngine : public VulkanRenderEngine {
             // Create the actual descriptorPool...
             descriptorPool = vkInitData.device.createDescriptorPool(poolCreateInfo);
 
+            // descriptor sets
+            //  add the first element of pipelineData.descriptorSetLayouts...
+            vector<vk::DescriptorSetLayout> layoutList(MAX_FRAMES_IN_FLIGHT,
+                pipelineData.descriptorSetLayouts[0]);
+
+            vk::DescriptorSetAllocateInfo allocInfo = vk::DescriptorSetAllocateInfo()
+                .setDescriptorPool(descriptorPool)
+                .setDescriptorSetCount(MAX_FRAMES_IN_FLIGHT)
+                .setSetLayouts(layoutList);
+
+            descriptorSets = vkInitData.device.allocateDescriptorSets(allocInfo);
+
+            // For each frame-in-flight index...
+            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+                // Create a vk::DescriptorBufferInfo object → bufferVertexInfo 
+                vk::DescriptorBufferInfo bufferVertInfo = vk::DescriptorBufferInfo()
+                    .setBuffer(deviceUBOVert.bufferData[i].buffer)
+                    .setOffset(0)
+                    .setRange(sizeof(UBOVertex));
+                // Create a vk::WriteDescriptorSet object → descVertWrites 
+                vk::WriteDescriptorSet descVertWrite = vk::WriteDescriptorSet()
+                    .setDstSet(descriptorSets[i])
+                    .setDstBinding(0)
+                    .setDstArrayElement(0)
+                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                    .setDescriptorCount(1)
+                    .setBufferInfo(bufferVertInfo);
+                // Create a vector of vk::WriteDescriptorSet objects → writes
+                vector<vk::WriteDescriptorSet> writes = {descVertWrite};
+                vkInitData.device.updateDescriptorSets(writes, {});
+
+            }
+
+
+
 
 
 
