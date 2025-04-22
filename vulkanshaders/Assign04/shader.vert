@@ -9,7 +9,18 @@ layout(push_constant) uniform PushConstants {
     mat4 modelMat;
 } pc;
 
+// Add the appropriate UBO struct
+layout(set = 0, binding = 0) uniform UBOVertex {
+    mat4 viewMat;
+    mat4 projMat;
+} ubo;
+
 void main() {
-    gl_Position = pc.modelMat * vec4(inPosition, 1.0);
+    vec4 pos = vec4(inPosition, 1.0);
+    pos = ubo.projMat * ubo.viewMat * pc.modelMat * pos;
+
+    gl_Position = pos;
     fragColor = inColor;
 } 
+
+
