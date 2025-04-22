@@ -407,10 +407,10 @@ static void key_callback (GLFWwindow *window, int key, int scancode, int action,
         } else if (key == GLFW_KEY_J) {
             sceneData.rotAngle += 1.0f;
 
-        } else if (key = GLFW_KEY_K) {
+        } else if (key == GLFW_KEY_K) {
             sceneData.rotAngle -= 1.0f;
 
-        } else if (key = GLFW_KEY_W) {
+        } else if (key == GLFW_KEY_W) {
             // Move FORWARD in current camera direction
             sceneData.eye += camDir * speed;
             sceneData.lookAt += camDir * speed;
