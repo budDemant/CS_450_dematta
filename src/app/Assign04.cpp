@@ -160,12 +160,26 @@ class Assign04RenderEngine : public VulkanRenderEngine {
 
             }
 
-
-
-
-
-
             return true;
+        }
+
+        virtual vector<vk::DescriptorSetLayout> getDescriptorSetLayouts() override {
+            // Create a vector of vk::DescriptorSetLayoutBinding objects → allBindings
+            vector<vk::DescriptorSetLayoutBinding> allBindings = {
+                vk::DescriptorSetLayoutBinding()
+                    .setBinding(0)
+                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                    .setDescriptorCount(1)
+                    .setStageFlags(vk::ShaderStageFlagBits::eVertex)
+                    .setPImmutableSamplers(nullptr)
+            };
+
+            // Create actual descriptor set layout
+            vk::DescriptorSetLayoutCreateInfo layoutInfo({}, allBindings);
+            vk::DescriptorSetLayout descriptorSetLayout = 
+                vkInitData.device.createDescriptorSetLayout(layoutInfo);
+            // Return a vector only containing the one vk::DescriptorSetLayout
+            return {descriptorSetLayout};   
         }
 
         // pulled from VKRender.cpp (line 415 except for cast and mesh loop)
