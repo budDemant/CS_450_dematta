@@ -91,7 +91,13 @@ class Assign04RenderEngine : public VulkanRenderEngine {
         Assign04RenderEngine(VulkanInitData &vkInitData) : VulkanRenderEngine(vkInitData) {}
 
         // destructor
-        virtual ~Assign04RenderEngine() {}; 
+        virtual ~Assign04RenderEngine() override {
+            // Destroy the descriptor pool
+            vkInitData.device.destroyDescriptorPool(descriptorPool);
+
+            // Clean up the UBO device data
+            cleanupVulkanUniformBufferData(vkInitData.device, deviceUBOVert);
+        }; 
     
         virtual bool initialize(VulkanInitRenderParams *params) override {
             if (!VulkanRenderEngine::initialize(params)) {
