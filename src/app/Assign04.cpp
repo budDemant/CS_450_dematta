@@ -521,11 +521,19 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
 
     // Create GLFW window
     GLFWwindow* window = createGLFWWindow(windowTitle, windowWidth, windowHeight);
+    
+    // keys
     glfwSetKeyCallback(window, key_callback);
 
     // mouse
     glfwSetCursorPosCallback(window, mouse_position_callback);
+    // hide cursor
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // Get the initial position of the mouse AFTER the GLFW window is created
+    double mx, my;
+    glfwGetCursorPos(window, &mx, &my);
+    sceneData.mousePos = glm::vec2(mx, my);
 
     // Setup up Vulkan via vk-bootstrap
     VulkanInitData vkInitData;
@@ -588,7 +596,19 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
         auto startTime = getTime();
 
         // Poll events for window
-        glfwPollEvents();  
+        glfwPollEvents();
+
+        // Update view and projection matrices each frame
+        sceneData.viewMat = glm::lookAt(sceneData.eye, sceneData.lookAt, glm::vec3(0, 1, 0));
+        // Calculate the aspect ratio as the framebuffer width divided by height 
+        int fbWidth, fbHeight;
+        glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+        float aspectRatio = 1.0f;
+        if (fbWidth > 0 && fbHeight > 0) {
+            aspectRatio = static_cast<float>(fbWidth) / static_cast<float>(fbHeight);
+        }
+        // Set the value of sceneData.projMat using glm::perspective()
+        sceneData.projMat = glm::perspective(glm::radians(90.0f), aspectRatio, 0.01f, 50.0f);
 
         // Draw frame
         renderEngine->drawFrame(&sceneData);   
