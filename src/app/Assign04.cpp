@@ -97,6 +97,33 @@ class Assign04RenderEngine : public VulkanRenderEngine {
             if (!VulkanRenderEngine::initialize(params)) {
                 return false;
             }
+
+            // create a UBO for each frame-in-flight (similar to profexercises08 line 252)
+            deviceUBOVert = createVulkanUniformBufferData(
+                vkInitData.device,
+                vkInitData.physicalDevice,
+                sizeof(UBOVertex),
+                MAX_FRAMES_IN_FLIGHT
+            );
+
+            // create the descriptor pool
+            vector<vk::DescriptorPoolSize> poolSizes = {
+                vk::DescriptorPoolSize(
+                    vk::DescriptorType::eUniformBuffer,
+                    1 * MAX_FRAMES_IN_FLIGHT
+                )
+            };
+
+            vk::DescriptorPoolCreateInfo poolCreateInfo = vk::DescriptorPoolCreateInfo()
+                .setPoolSizes(poolSizes)
+                .setMaxSets(MAX_FRAMES_IN_FLIGHT);
+
+            // Create the actual descriptorPool...
+            descriptorPool = vkInitData.device.createDescriptorPool(poolCreateInfo);
+
+
+
+
             return true;
         }
 
@@ -168,7 +195,12 @@ class Assign04RenderEngine : public VulkanRenderEngine {
                 }
             };
         }
-                        
+    protected:
+    
+        UBOVertex hostUBOVert; // HOST vertex shader UBO data
+        UBOData deviceUBOVert; // DEVICE vertex shader UBO data
+        vk::DescriptorPool descriptorPool; // Memory manager for descriptor sets
+        vector<vk::DescriptorSet> descriptorSets; // List of descriptor sets
 };
 
 
