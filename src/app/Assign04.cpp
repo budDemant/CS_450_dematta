@@ -182,6 +182,27 @@ class Assign04RenderEngine : public VulkanRenderEngine {
             return {descriptorSetLayout};   
         }
 
+        virtual void updateUniformBuffers(SceneData *sceneData, vk::CommandBuffer &commandBuffer) {
+            // Copy view matrix and projection matrix from sceneData into appropriate fields of hostUBOVert
+            hostUBOVert.viewMat = sceneData->viewMat;
+            hostUBOVert.projMat = sceneData->projMat;
+
+            // Invert Y for the projection matrix
+            hostUBOVert.projMat[1][1] *= -1.0f;
+
+            // Copy UBO host data into the CORRECT device UBO data
+            memcpy(deviceUBOVert.mapped[this->currentImage], &hostUBOVert, sizeof(hostUBOVert));
+
+            // Bind the CORRECT descriptor sets
+            commandBuffer.bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics,
+                pipelineData.pipelineLayout,
+                0,
+                descriptorSets[currentImage],
+                {}
+            );
+        }
+
         // pulled from VKRender.cpp (line 415 except for cast and mesh loop)
         virtual void recordCommandBuffer(void *userData,
             vk::CommandBuffer &commandBuffer,
@@ -226,6 +247,9 @@ class Assign04RenderEngine : public VulkanRenderEngine {
                 // for (VulkanMesh &mesh : sceneData->allMeshes) {
                 //     recordDrawVulkanMesh(commandBuffer, mesh);
                 // }
+
+                updateUniformBuffers(sceneData, commandBuffer);
+
                 renderScene(
                     commandBuffer,
                     sceneData,
