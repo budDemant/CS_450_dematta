@@ -376,18 +376,60 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
     }
         
 } 
+// from Assign03.cpp
+// static void key_callback (GLFWwindow *window,
+//                             int key, int scancode,
+//                             int action, int mods) {
+//     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+//         if (key == GLFW_KEY_ESCAPE) {
+//             glfwSetWindowShouldClose(window,true);
+//         } else if (key == GLFW_KEY_J) {
+//             sceneData.rotAngle += 1.0f;
+//         } else if (key == GLFW_KEY_K) {
+//             sceneData.rotAngle -= 1.0f;
+//         }
+//     }
+// }
 
-static void key_callback (GLFWwindow *window,
-                            int key, int scancode,
-                            int action, int mods) {
+static void key_callback (GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        const float speed = 0.1f;
+
+        // Camera direction
+        glm::vec3 camDir = glm::normalize(sceneData.lookAt - sceneData.eye);
+
+        // Local x axis
+        glm::vec3 localX = glm::normalize(glm::cross(camDir, glm::vec3(0, 1, 0)));
+
         if (key == GLFW_KEY_ESCAPE) {
-            glfwSetWindowShouldClose(window,true);
+            glfwSetWindowShouldClose(window, true);
+
         } else if (key == GLFW_KEY_J) {
             sceneData.rotAngle += 1.0f;
-        } else if (key == GLFW_KEY_K) {
+
+        } else if (key = GLFW_KEY_K) {
             sceneData.rotAngle -= 1.0f;
+
+        } else if (key = GLFW_KEY_W) {
+            // Move FORWARD in current camera direction
+            sceneData.eye += camDir * speed;
+            sceneData.lookAt += camDir * speed;
+
+        } else if (key == GLFW_KEY_S) {
+            sceneData.eye -= camDir * speed;
+            sceneData.lookAt -= camDir * speed;
+
+        } else if (key == GLFW_KEY_D) {
+            // Move RIGHT in local X axis
+            sceneData.eye += localX * speed;
+            sceneData.lookAt += localX * speed;
+
+        } else if (key == GLFW_KEY_A) {
+            sceneData.eye -= localX * speed;
+            sceneData.lookAt -= localX * speed;
         }
+
+        
     }
 }
 
