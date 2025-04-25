@@ -135,11 +135,19 @@ class Assign05RenderEngine : public VulkanRenderEngine {
                 MAX_FRAMES_IN_FLIGHT
             );
 
+            // Create deviceUBOFrag (instance variable)
+            deviceUBOFrag = createVulkanUniformBufferData(
+                vkInitData.device,
+                vkInitData.physicalDevice,
+                sizeof(UBOFragment),
+                MAX_FRAMES_IN_FLIGHT
+            );
+
             // create the descriptor pool
             vector<vk::DescriptorPoolSize> poolSizes = {
                 vk::DescriptorPoolSize(
                     vk::DescriptorType::eUniformBuffer,
-                    1 * MAX_FRAMES_IN_FLIGHT
+                    2 * MAX_FRAMES_IN_FLIGHT
                 )
             };
 
@@ -179,6 +187,23 @@ class Assign05RenderEngine : public VulkanRenderEngine {
                     .setBufferInfo(bufferVertInfo);
                 // Create a vector of vk::WriteDescriptorSet objects → writes
                 vector<vk::WriteDescriptorSet> writes = {descVertWrite};
+
+                // for frag shader
+                vk::DescriptorBufferInfo bufferFragInfo = vk::DescriptorBufferInfo()
+                    .setBuffer(deviceUBOFrag.bufferData[i].buffer)
+                    .setOffset(0)
+                    .setRange(sizeof(UBOFragment));
+                
+                vk::WriteDescriptorSet descFragWrite = vk::WriteDescriptorSet()
+                    .setDstSet(descriptorSets[i])
+                    .setDstBinding(1)
+                    .setDstArrayElement(0)
+                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                    .setDescriptorCount(1)
+                    .setBufferInfo(bufferFragInfo);
+
+                writes.push_back(descFragWrite); // Add descFragWrites to writes
+                
                 vkInitData.device.updateDescriptorSets(writes, {});
 
             }
