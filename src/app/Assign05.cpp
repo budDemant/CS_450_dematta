@@ -120,6 +120,7 @@ class Assign05RenderEngine : public VulkanRenderEngine {
 
             // Clean up the UBO device data
             cleanupVulkanUniformBufferData(vkInitData.device, deviceUBOVert);
+            cleanupVulkanUniformBufferData(vkInitData.device, deviceUBOFrag);
         }; 
     
         virtual bool initialize(VulkanInitRenderParams *params) override {
@@ -214,11 +215,19 @@ class Assign05RenderEngine : public VulkanRenderEngine {
         virtual vector<vk::DescriptorSetLayout> getDescriptorSetLayouts() override {
             // Create a vector of vk::DescriptorSetLayoutBinding objects → allBindings
             vector<vk::DescriptorSetLayoutBinding> allBindings = {
+                // vertex shader
                 vk::DescriptorSetLayoutBinding()
                     .setBinding(0)
                     .setDescriptorType(vk::DescriptorType::eUniformBuffer)
                     .setDescriptorCount(1)
                     .setStageFlags(vk::ShaderStageFlagBits::eVertex)
+                    .setPImmutableSamplers(nullptr),
+                // frag shader
+                vk::DescriptorSetLayoutBinding()
+                    .setBinding(1)
+                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                    .setDescriptorCount(1)
+                    .setStageFlags(vk::ShaderStageFlagBits::eFragment)
                     .setPImmutableSamplers(nullptr)
             };
 
@@ -228,6 +237,40 @@ class Assign05RenderEngine : public VulkanRenderEngine {
                 vkInitData.device.createDescriptorSetLayout(layoutInfo);
             // Return a vector only containing the one vk::DescriptorSetLayout
             return {descriptorSetLayout};   
+        }
+
+        virtual AttributeDescData getAttributeDescData() override {
+            AttributeDescData attribDescData;
+
+            attribDescData.bindDesc = vk::VertexInputBindingDescription(
+                0, sizeof(Vertex), vk::VertexInputRate::eVertex
+            );
+
+            // Clear attribDescData.attribDesc
+            attribDescData.attribDesc.clear();
+
+            // Position (vec3)
+            attribDescData.attribDesc.push_back(
+                vk::VertexInputAttributeDescription(
+                    0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)
+                )
+            );
+
+            // Color (vec4)
+            attribDescData.attribDesc.push_back(
+                vk::VertexInputAttributeDescription(
+                    1, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(Vertex, color)
+                )
+            );
+
+            // Normal (vec3)
+            attribDescData.attribDesc.push_back(
+                vk::VertexInputAttributeDescription(
+                    2, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, normal)
+                )
+            );
+
+            return attribDescData;
         }
 
         virtual void updateUniformBuffers(SceneData *sceneData, vk::CommandBuffer &commandBuffer) {
