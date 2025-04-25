@@ -298,9 +298,10 @@ class Assign05RenderEngine : public VulkanRenderEngine {
             };
         }
     protected:
-    
         UBOVertex hostUBOVert; // HOST vertex shader UBO data
         UBOData deviceUBOVert; // DEVICE vertex shader UBO data
+        UBOFragment hostUBOFrag; // Holds HOST fragment shader UBO data
+        UBOData deviceUBOFrag; // Holds DEVICE fragment shader UBO data
         vk::DescriptorPool descriptorPool; // Memory manager for descriptor sets
         vector<vk::DescriptorSet> descriptorSets; // List of descriptor sets
 };
@@ -450,9 +451,39 @@ static void key_callback (GLFWwindow *window, int key, int scancode, int action,
         } else if (key == GLFW_KEY_A) {
             sceneData.eye -= localX * speed;
             sceneData.lookAt -= localX * speed;
-        }
-
         
+        // light controls
+        } else if (key == GLFW_KEY_1) {
+            sceneData.light.color = glm::vec4(1, 1, 1, 1); // white
+        } else if (key == GLFW_KEY_2) {
+            sceneData.light.color = glm::vec4(1, 0, 0, 1); // red
+        } else if (key == GLFW_KEY_3) {
+            sceneData.light.color = glm::vec4(0, 1, 0, 1); // green
+        } else if (key == GLFW_KEY_4) {
+            sceneData.light.color = glm::vec4(0, 0, 1, 1); // blue
+
+        // material controls    
+        } else if (key == GLFW_KEY_V) {
+            sceneData.metallic -= 0.1f;
+            if (sceneData.metallic < 0.0f) {
+                sceneData.metallic = 0.0f;
+            }
+        } else if (key == GLFW_KEY_B) {
+            sceneData.metallic += 0.1f;
+            if (sceneData.metallic > 1.0f) {
+                sceneData.metallic = 1.0f;
+            }
+        } else if (key == GLFW_KEY_N) {
+            sceneData.roughness -= 0.1f;
+            if (sceneData.roughness < 0.1f) {
+                sceneData.roughness = 0.1f;
+            }
+        } else if (key == GLFW_KEY_M) {
+            sceneData.roughness += 0.1f;
+            if (sceneData.roughness > 0.7f) {
+                sceneData.roughness = 0.7f;
+            }
+        }
     }
 }
 
