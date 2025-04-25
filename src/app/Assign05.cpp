@@ -18,13 +18,26 @@
 
 struct UPushVertex {
     alignas(16) glm::mat4 modelMat;
+    alignas(16) glm::mat4 normMat; // Add to the UPushVertex struct a field for the normal matrix
 };
-
 
 struct Vertex { 
     glm::vec3 pos; 
     glm::vec4 color; 
+    glm::vec3 normal; // Add to the Vertex struct a field for the normal
     };
+
+struct PointLight {
+    alignas(16) glm::vec4 pos; // light’s world position
+    alignas(16) glm::vec4 vpos; // light’s view position
+    alignas(16) glm::vec4 color; // light’s color
+};
+
+struct UBOFragment {
+    PointLight light;
+    alignas(4) float metallic;
+    alignas(4) float roughness; 
+};
 
 struct SceneData {     
     vector<VulkanMesh> allMeshes; 
@@ -39,6 +52,16 @@ struct SceneData {
 
     glm::mat4 viewMat = glm::mat4(1.0f); 
     glm::mat4 projMat = glm::mat4(1.0f); 
+
+    // new
+    PointLight light = {
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+        glm::vec4(0.0f),
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+    };
+
+    float metallic = 0.0f;
+    float roughness = 0.1f;
     };
 
 SceneData sceneData;
