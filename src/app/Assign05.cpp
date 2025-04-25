@@ -753,6 +753,9 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
         // Set the value of sceneData.projMat using glm::perspective()
         sceneData.projMat = glm::perspective(glm::radians(90.0f), aspectRatio, 0.01f, 50.0f);
 
+        // Update the light’s view position
+        sceneData.light.vpos = sceneData.viewMat * sceneData.light.pos;
+        
         // Draw frame
         renderEngine->drawFrame(&sceneData);   
 
