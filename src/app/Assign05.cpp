@@ -284,6 +284,13 @@ class Assign05RenderEngine : public VulkanRenderEngine {
             // Copy UBO host data into the CORRECT device UBO data
             memcpy(deviceUBOVert.mapped[this->currentImage], &hostUBOVert, sizeof(hostUBOVert));
 
+            // Fragment UBO
+            hostUBOFrag.light = sceneData->light;
+            hostUBOFrag.metallic = sceneData->metallic;
+            hostUBOFrag.roughness = sceneData->roughness;
+
+            memcpy(deviceUBOFrag.mapped[this->currentImage], &hostUBOFrag, sizeof(hostUBOFrag));
+
             // Bind the CORRECT descriptor sets
             commandBuffer.bindDescriptorSets(
                 vk::PipelineBindPoint::eGraphics,
@@ -403,6 +410,16 @@ void renderScene(vk::CommandBuffer &commandBuffer,
         UPushVertex pushData;
         pushData.modelMat = tmpModel;
 
+        // calculate normal matrix
+        pushData.normMat = glm::mat4(
+            glm::transpose(
+                glm::inverse(
+                    glm::mat3(sceneData->viewMat * tmpModel)
+                )
+            )
+        );
+
+
         // use commandBuffer.pushConstants() to push up the UPushVertex data
         commandBuffer.pushConstants(
             // this->pipelineData... doesn't work for me, used similar structure to ProfExercises07 line 459
@@ -447,7 +464,11 @@ void extractMeshData(aiMesh *mesh, Mesh<Vertex> &m) {
         // somehow convert to glm::vec3 structs
         v.pos = glm::vec3(aiPos.x, aiPos.y, aiPos.z);
         // Set the color of the Vertex (non-black and alpha = 1.0)
-        v.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        v.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+        // normal
+        aiVector3D aiNormal = mesh->mNormals[i];
+        v.normal = glm::vec3(aiNormal.x, aiNormal.y, aiNormal.z);
         
         // Add the Vertex to the Mesh's vertices list
         m.vertices.push_back(v);
