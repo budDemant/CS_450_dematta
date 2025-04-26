@@ -21,6 +21,15 @@ layout(set=0, binding=1) uniform UBOFragment {
     float roughness;
 } uboFrag;
 
+vec3 getFresnelAtAngleZero(vec3 albedo, float metallic) {
+    vec3 F0 = vec3(0.04); // Good default value for insulators (0.04)
+    
+    F0 = mix(F0, albedo, metallic);
+
+    return F0;
+}
+
+
 
 void main() {
 
