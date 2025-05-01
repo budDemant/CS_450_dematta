@@ -97,7 +97,8 @@ void main() {
     vec3 specular = numerator / denom;
 
 
-    vec3 finalColor = (kD + kS) * vec3(uboFrag.light.color) * max(dot(N, L), 0.0);
+    vec3 finalColor = (diffuse + specular) * vec3(uboFrag.light.color) * max(dot(N, L), 0.0);
+
     outColor = vec4(finalColor, 1.0);
 
 } 
