@@ -69,6 +69,17 @@ float getGF(vec3 L, vec3 V, vec3 N, float roughness) {
 
 void main() {
 
+    vec3 N = normalize(interNormal); // Normalize interNormal → N
+    vec3 L = normalize(vec3(uboFrag.light.vpos) - vec3(interPos)); // Calculate light vector L
+    vec3 baseColor = vec3(fragColor); 
+    vec3 V = normalize(-vec3(interPos)); // Calculate the normalized view vector V
+    vec3 F0 = getFresnelAtAngleZero(baseColor, uboFrag.metallic); // Calculate F0
+    vec3 H = normalize(L + V); // Calculate normalized half-vector H
+    vec3 F = getFresnel(F0, L, H); // Calculate Fresnel reflectance F
+    vec3 kS = F; // specular color kS
+
+
+
     // Gamma-correct (linear to sRGB)
     vec4 finalColor = fragColor;
     //finalColor.rgb = pow(finalColor.rgb, vec3(2.2));
