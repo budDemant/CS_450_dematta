@@ -78,12 +78,26 @@ void main() {
     vec3 F = getFresnel(F0, L, H); // Calculate Fresnel reflectance F
     vec3 kS = F; // specular color kS
 
+    // complete diffuse color
+    vec3 kD = (vec3(1.0) - kS) * (1.0 - uboFrag.metallic);
+    vec3 diffuse = (kD * baseColor) / PI;
+
+    // complete specular reflection
+    float roughness = uboFrag.roughness;
+
+    float D = getNDF(H, N, roughness);
+    float G = getGF(L, V, N, roughness);
+
+    vec3 numerator = kS * D * G;
+
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+    float denom = 4.0 * NdotL * NdotV + 0.0001;
+
+    vec3 specular = numerator / denom;
 
 
-    // Gamma-correct (linear to sRGB)
-    vec4 finalColor = fragColor;
-    //finalColor.rgb = pow(finalColor.rgb, vec3(2.2));
+    vec3 finalColor = (kD + kS) * vec3(uboFrag.light.color) * max(dot(N, L), 0.0);
+    outColor = vec4(finalColor, 1.0);
 
-    // Output final color
-    outColor = finalColor;
 } 
