@@ -436,6 +436,7 @@ static void key_callback (GLFWwindow *window, int key, int scancode, int action,
 static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
     glm::vec2 newMousePos = glm::vec2 (xpos, ypos);
     glm::vec2 relMouse = newMousePos - sceneData.mousePos;
+    relMouse = -relMouse;
 
     // Use glfwGetFramebufferSize() to acquire the current framebuffer size
     // (similar to ProfExercises08 mouse_motion_callback)
